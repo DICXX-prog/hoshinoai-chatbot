@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HoshinoAi - Teman Ngobrol BY DICXX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background-color: #1f1f1f;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    header p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .message.bot {
+      flex-direction: row;
+    }
+    .message.user {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin: 0 10px;
+      object-fit: cover;
+      border: 2px solid #555;
+    }
+    .text {
+      max-width: 70%;
+      background-color: #2a2a2a;
+      padding: 10px 15px;
+      border-radius: 12px;
+    }
+    .input-area {
+      display: flex;
+      padding: 1rem;
+      background-color: #1f1f1f;
+      border-top: 1px solid #333;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #2a2a2a;
+      color: white;
+    }
+    button {
+      margin-left: 10px;
+      padding: 0.75rem 1rem;
+      background-color: #6200ea;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #7f39fb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🤖 HoshinoAi</h1>
+    <p>Teman ngobrol BY DICXX</p>
+  </header>
+
+  <div class="chat-box" id="chatBox">
+    <div class="message bot">
+      <img src="images/hoshinoai.jpg" class="avatar" alt="HoshinoAi">
+      <div class="text">Hai! Aku HoshinoAi, teman ngobrol virtual kamu ✨</div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="Ketik sesuatu..." />
+    <button onclick="sendMessage()">Kirim</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const chatBox = document.getElementById('chatBox');
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Tampilkan pesan user
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user';
+      userMsg.innerHTML = `<div class="text">${message}</div>`;
+      chatBox.appendChild(userMsg);
+
+      // Kosongkan input & scroll ke bawah
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Tampilkan loading dari bot
+      const botMsg = document.createElement('div');
+      botMsg.className = 'message bot';
+      botMsg.innerHTML = `
+        <img src="images/hoshinoai.jpg" class="avatar" alt="HoshinoAi">
+        <div class="text">Mengetik...</div>
+      `;
+      chatBox.appendChild(botMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Kirim ke backend Flask
+      try {
+        const response = await fetch('http://127.0.0.1:5000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        botMsg.querySelector('.text').textContent = data.reply;
+      } catch (error) {
+        botMsg.querySelector('.text').textContent = 'Maaf, terjadi kesalahan saat menghubungi AI 😢';
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
